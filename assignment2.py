@@ -44,11 +44,14 @@ class Game:
                 x = random.randint(0, self.n - 1)
                 y = random.randint(0, self.n - 1)
 
+                # If by some chance the place has already been picked (unlikely to happen)
                 while self.current_state[x][y] == 'B':
                     x = random.randint(0, self.n - 1)
                     y = random.randint(0, self.n - 1)
 
                 self.current_state[x][y] = 'B'
+
+        print(self.e1(1,1,'X'))
 
         # Player X always plays first
         self.player_turn = 'X'
@@ -100,13 +103,11 @@ class Game:
                         previous_char = col[j]
                         counter = 1
         # Horizontal win
-        previous_char = '.'
-        counter = 1
         for i in range(0, self.n):
+            counter = 1
+            previous_char = '.'
             for j in range(0, self.n):
                 row = self.current_state[j][i]
-                counter = 1
-                previous_char = '.'
                 if row == '.' or row == 'B':
                     continue
                 elif row == 'X':
@@ -115,7 +116,7 @@ class Game:
                         if counter == self.s:
                             return row
                     else:
-                        previous_char = row
+                        previous_char = 'X'
                         counter = 1
                 elif row == 'O':
                     if previous_char == 'O':
@@ -123,14 +124,9 @@ class Game:
                         if counter == self.s:
                             return row
                     else:
-                        previous_char = row
+                        previous_char = 'O'
                         counter = 1
-
         # Main diagonal win
-        # if (self.current_state[0][0] != '.' and
-        #         self.current_state[0][0] == self.current_state[1][1] and
-        #         self.current_state[0][0] == self.current_state[2][2]):
-        #     return self.current_state[0][0]
         counter = 1
         previous_char = '.'
         for i in range(0, self.n):
@@ -144,6 +140,9 @@ class Game:
                     continue
                 for x in range(1, self.s):
                     try:
+                        if j+x > self.n or i+x > self.n:
+                            counter = 1
+                            break
                         if self.current_state[j + x][i + x] == pos:
                             counter = counter + 1
                         else:
@@ -156,33 +155,26 @@ class Game:
                     counter = 1
 
         # # Second diagonal win
-        # if (self.current_state[0][2] != '.' and
-        #         self.current_state[0][2] == self.current_state[1][1] and
-        #         self.current_state[0][2] == self.current_state[2][0]):
-        #     return self.current_state[0][2]
-        counter = 1
-        previous_char = '.'
         for i in range(0, self.n):
             for j in range(0, self.n):
-                counter = 1
-                previous_char = '.'
                 pos = self.current_state[j][i]
                 counter = 1
                 if pos == '.' or pos == 'B':
-                    counter = 1
                     continue
                 for x in range(1, self.s):
                     try:
+                        if j-x < 0 or i+x > self.n:
+                            counter = 1
+                            break
                         if self.current_state[j - x][i + x] == pos:
                             counter = counter + 1
                         else:
+                            counter = 1
                             break
                     except IndexError:
-                        pass
+                        counter = 1
                 if counter == self.s:
                     return pos
-                else:
-                    counter = 1
 
         # Is whole board full?
         for i in range(0, self.n):
@@ -242,6 +234,8 @@ class Game:
             return (1, x, y)
         elif result == '.':
             return (0, x, y)
+        elif result == 'B':
+            return (0, x, y)
         for i in range(0, 3):
             for j in range(0, 3):
                 if self.current_state[i][j] == '.':
@@ -262,6 +256,9 @@ class Game:
                     self.current_state[i][j] = '.'
         return (value, x, y)
 
+    def other_minimax(self, depth, max=False):
+        pass
+
     def alphabeta(self, alpha=-2, beta=2, max=False):
         # Minimizing for 'X' and maximizing for 'O'
         # Possible values are:
@@ -281,8 +278,8 @@ class Game:
             return (1, x, y)
         elif result == '.':
             return (0, x, y)
-        for i in range(0, 3):
-            for j in range(0, 3):
+        for i in range(0, self.n):
+            for j in range(0, self.n):
                 if self.current_state[i][j] == '.':
                     if max:
                         self.current_state[i][j] = 'O'
@@ -311,6 +308,55 @@ class Game:
                             beta = value
         return (value, x, y)
 
+    def e1(self, x, y, value):
+
+        score = 0
+        if x-1 >= 0:
+            if self.current_state[x-1][y] == value:
+                score += 1
+            elif self.current_state[x-1][y] == 'B':
+                score -= 1
+        if x+1 < self.n:
+            if self.current_state[x+1][y] == value:
+                score += 1
+            elif self.current_state[x+1][y] == 'B':
+                score -= 1
+        if y-1 >= 0:
+            if self.current_state[x][y-1] == value:
+                score += 1
+            elif self.current_state[x][y-1] == 'B':
+                score -= 1
+        if y+1 < self.n:
+            if self.current_state[x][y+1] == value:
+                score += 1
+            elif self.current_state[x][y+1] == 'B':
+                score -= 1
+        if x-1 >= 0 and y-1 >= 0:
+            if self.current_state[x-1][y-1] == value:
+                score += 1
+            elif self.current_state[x-1][y-1] == 'B':
+                score -= 1
+        if x+1 < self.n and y+1 < self.n:
+            if self.current_state[x+1][y+1] == value:
+                score += 1
+            elif self.current_state[x+1][y+1] == 'B':
+                score -= 1
+        if x-1 >= 0 and y+1 < self.n:
+            if self.current_state[x-1][y+1] == value:
+                score += 1
+            elif self.current_state[x-1][y+1] == 'B':
+                score -= 1
+        if x+1 < self.n and y-1 >= 0:
+            if self.current_state[x+1][y-1] == value:
+                score += 1
+            elif self.current_state[x+1][y-1] == 'B':
+                score -= 1
+
+        return score
+
+    def e2(self, x, y, value):
+        pass
+
     def play(self, algo=None, player_x=None, player_o=None):
         if algo == None:
             algo = self.ALPHABETA
@@ -338,7 +384,7 @@ class Game:
                     self.player_turn == 'O' and player_o == self.HUMAN):
                 if self.recommend:
                     print(F'Evaluation time: {round(end - start, 7)}s')
-                    # print(F'Recommended move: x = {x}, y = {y}')
+                    print(F'Recommended move: x = {x}, y = {y}')
                 (x, y) = self.input_move()
             if (self.player_turn == 'X' and player_x == self.AI) or (self.player_turn == 'O' and player_o == self.AI):
                 print(F'Evaluation time: {round(end - start, 7)}s')
@@ -411,8 +457,8 @@ def main():
         g = Game(args.n, args.b, args.coordinate, args.s, args.d1, args.d2, args.t, args.a, args.p1, args.p2,
                  recommend=False)
         # g.draw_board()
-        g.play(algo=Game.ALPHABETA, player_x=Game.HUMAN, player_o=Game.HUMAN)
-        # g.play(algo=Game.MINIMAX,player_x=Game.HUMAN,player_o=Game.HUMAN)
+        # g.play(algo=Game.ALPHABETA, player_x=Game.AI, player_o=Game.AI)
+        g.play(algo=Game.MINIMAX,player_x=Game.HUMAN,player_o=Game.HUMAN)
 
 
 if __name__ == "__main__":
