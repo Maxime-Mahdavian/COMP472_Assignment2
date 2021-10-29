@@ -4,6 +4,7 @@ import time
 import argparse
 import numpy
 import random
+import math
 
 
 class Game:
@@ -51,8 +52,9 @@ class Game:
 
                 self.current_state[x][y] = 'B'
 
-        print(self.e1(1,1,'X'))
-
+        # self.current_state[0][0] = 'B'
+        # self.draw_board()
+        # self.e2()
         # Player X always plays first
         self.player_turn = 'X'
 
@@ -85,6 +87,8 @@ class Game:
             previous_char = '.'
             for j in range(0, self.n):
                 if col[j] == '.' or col[j] == 'B':
+                    previous_char = col[j]
+                    counter = 1
                     continue
                 elif col[j] == 'X':
                     if previous_char == 'X':
@@ -109,22 +113,24 @@ class Game:
             for j in range(0, self.n):
                 row = self.current_state[j][i]
                 if row == '.' or row == 'B':
+                    previous_char = row
+                    counter = 1
                     continue
                 elif row == 'X':
                     if previous_char == 'X':
-                        counter = counter + 1
+                        counter += 1
                         if counter == self.s:
                             return row
                     else:
-                        previous_char = 'X'
+                        previous_char = row
                         counter = 1
                 elif row == 'O':
                     if previous_char == 'O':
-                        counter = counter + 1
+                        counter += 1
                         if counter == self.s:
                             return row
                     else:
-                        previous_char = 'O'
+                        previous_char = row
                         counter = 1
         # Main diagonal win
         counter = 1
@@ -140,7 +146,7 @@ class Game:
                     continue
                 for x in range(1, self.s):
                     try:
-                        if j+x > self.n or i+x > self.n:
+                        if j + x > self.n or i + x > self.n:
                             counter = 1
                             break
                         if self.current_state[j + x][i + x] == pos:
@@ -163,7 +169,7 @@ class Game:
                     continue
                 for x in range(1, self.s):
                     try:
-                        if j-x < 0 or i+x > self.n:
+                        if j - x < 0 or i + x > self.n:
                             counter = 1
                             break
                         if self.current_state[j - x][i + x] == pos:
@@ -215,83 +221,114 @@ class Game:
             self.player_turn = 'X'
         return self.player_turn
 
-    def minimax(self, max=False):
+    def minimax(self, depth, time_left, max=False):
         # Minimizing for 'X' and maximizing for 'O'
         # Possible values are:
         # -1 - win for 'X'
         # 0  - a tie
         # 1  - loss for 'X'
         # We're initially setting it to 2 or -2 as worse than the worst case:
-        value = 2
+        start_time = time.time()
+        if time_left < 0.1:
+            if max:
+                return self.e2('O')
+            else:
+                return self.e2('X')
+
+        value = math.inf
         if max:
-            value = -2
+            value = -math.inf
         x = None
         y = None
+
         result = self.is_end()
+
         if result == 'X':
-            return (-1, x, y)
+            return -self.n * self.n, x, y
         elif result == 'O':
-            return (1, x, y)
-        elif result == '.':
-            return (0, x, y)
-        elif result == 'B':
-            return (0, x, y)
-        for i in range(0, 3):
-            for j in range(0, 3):
+            return self.n * self.n + 1, x, y
+
+        if depth == 0:
+            if max:
+                return self.e1('O')
+            else:
+                return self.e1('X')
+
+        for i in range(0, self.n):
+            for j in range(0, self.n):
                 if self.current_state[i][j] == '.':
                     if max:
                         self.current_state[i][j] = 'O'
-                        (v, _, _) = self.minimax(max=False)
-                        if v > value:
+                        end_time = time.time()
+                        new_time_left = time_left - (end_time - start_time)
+                        (v, _, _) = self.minimax(depth - 1, new_time_left, max=False)
+                        if v > value or value == math.inf:
                             value = v
                             x = i
                             y = j
                     else:
                         self.current_state[i][j] = 'X'
-                        (v, _, _) = self.minimax(max=True)
-                        if v < value:
+                        end_time = time.time()
+                        new_time_left = time_left - (end_time - start_time)
+                        (v, _, _) = self.minimax(depth - 1, new_time_left,max=True)
+                        if v < value or value == -math.inf:
                             value = v
                             x = i
                             y = j
                     self.current_state[i][j] = '.'
         return (value, x, y)
 
-    def other_minimax(self, depth, max=False):
-        pass
-
-    def alphabeta(self, alpha=-2, beta=2, max=False):
+    def alphabeta(self, depth, time_left,alpha=-2, beta=2, max=False):
         # Minimizing for 'X' and maximizing for 'O'
         # Possible values are:
         # -1 - win for 'X'
         # 0  - a tie
         # 1  - loss for 'X'
         # We're initially setting it to 2 or -2 as worse than the worst case:
-        value = 2
+
+        start_time = time.time()
+        if time_left < 0.1:
+            if max:
+                return self.e2('O')
+            else:
+                return self.e2('X')
+
+        value = math.inf
         if max:
-            value = -2
+            value = -math.inf
         x = None
         y = None
+
         result = self.is_end()
         if result == 'X':
-            return (-1, x, y)
+            return -self.n * self.n, x, y
         elif result == 'O':
-            return (1, x, y)
-        elif result == '.':
-            return (0, x, y)
+            return self.n * self.n + 1, x, y
+
+        if depth == 0:
+            if max:
+                return self.e2('O')
+            else:
+                return self.e2('X')
+
         for i in range(0, self.n):
             for j in range(0, self.n):
                 if self.current_state[i][j] == '.':
                     if max:
                         self.current_state[i][j] = 'O'
-                        (v, _, _) = self.alphabeta(alpha, beta, max=False)
-                        if v > value:
+                        end_time = time.time()
+                        new_time_left = time_left - (end_time - start_time)
+                        (v, _, _) = self.alphabeta(depth - 1, new_time_left, alpha, beta, max=False)
+                        if v > value or value == math.inf:
                             value = v
                             x = i
                             y = j
                     else:
                         self.current_state[i][j] = 'X'
-                        (v, _, _) = self.alphabeta(alpha, beta, max=True)
-                        if v < value:
+                        end_time = time.time()
+                        new_time_left = time_left - (end_time - start_time)
+                        (v, _, _) = self.alphabeta(depth - 1, new_time_left, alpha, beta, max=True)
+                        if v < value or value == -math.inf:
                             value = v
                             x = i
                             y = j
@@ -306,56 +343,152 @@ class Game:
                             return (value, x, y)
                         if value < beta:
                             beta = value
+
         return (value, x, y)
 
-    def e1(self, x, y, value):
+    def e1(self, cell):
+
+        visited = [[False for j in range(self.n)] for i in range(self.n)]
+
+        count = 0
+        x = 0
+        for i in range(self.n):
+            for j in range(self.n):
+                if visited[i][j] == False and self.current_state[i][j] == cell:
+                    self.DFS(i, j, visited, x)
+                    count += 1
+
+        test = numpy.array(visited).sum()
+        return test, None, None
+        # return count
+
+    def e2(self, cell):
 
         score = 0
-        if x-1 >= 0:
-            if self.current_state[x-1][y] == value:
-                score += 1
-            elif self.current_state[x-1][y] == 'B':
-                score -= 1
-        if x+1 < self.n:
-            if self.current_state[x+1][y] == value:
-                score += 1
-            elif self.current_state[x+1][y] == 'B':
-                score -= 1
-        if y-1 >= 0:
-            if self.current_state[x][y-1] == value:
-                score += 1
-            elif self.current_state[x][y-1] == 'B':
-                score -= 1
-        if y+1 < self.n:
-            if self.current_state[x][y+1] == value:
-                score += 1
-            elif self.current_state[x][y+1] == 'B':
-                score -= 1
-        if x-1 >= 0 and y-1 >= 0:
-            if self.current_state[x-1][y-1] == value:
-                score += 1
-            elif self.current_state[x-1][y-1] == 'B':
-                score -= 1
-        if x+1 < self.n and y+1 < self.n:
-            if self.current_state[x+1][y+1] == value:
-                score += 1
-            elif self.current_state[x+1][y+1] == 'B':
-                score -= 1
-        if x-1 >= 0 and y+1 < self.n:
-            if self.current_state[x-1][y+1] == value:
-                score += 1
-            elif self.current_state[x-1][y+1] == 'B':
-                score -= 1
-        if x+1 < self.n and y-1 >= 0:
-            if self.current_state[x+1][y-1] == value:
-                score += 1
-            elif self.current_state[x+1][y-1] == 'B':
-                score -= 1
+        for i in range(self.n):
+            for j in range(self.n):
+                # print("------------")
+                if self.n - j < self.s:
+                    continue
+                temp = 0
+                for x in range(self.s):
+                    # print(str(j+x) + "," + str(i))
+                    if self.current_state[j + x][i] == '.':
+                        continue
+                    elif self.current_state[j + x][i] == 'B':
+                        score -= 1
+                    elif self.current_state[j + x][i] == cell:
+                        temp += 1
+                        score += 2
+                    else:
+                        temp -= 1
+                        score -= 2
+                if temp == 2 and cell == 'X':
+                    score = -1000
+                    return score, None, None
+                elif temp == -2 and cell == 'O':
+                    score = 1000
+                    return score, None, None
 
-        return score
+        for i in range(self.n):
+            for j in range(self.n):
+                # print("----------")
+                if self.n - i < self.s:
+                    continue
+                temp = 0
+                for x in range(self.s):
+                    # print(str(j) + "," + str(i+x))
+                    # print(self.current_state[j][x+i])
+                    if self.current_state[j][x + i] == '.':
+                        continue
+                    elif self.current_state[j][x + i] == 'B':
+                        score -= 1
+                    elif self.current_state[j][x + i] == cell:
+                        temp += 1
+                        score += 2
+                    else:
+                        temp -= 1
+                        score -= 2
+                if temp == 2 and cell == 'X':
+                    score = -1000
+                    return score, None, None
+                elif temp == -2 and cell == 'O':
+                    score = 1000
+                    return score, None, None
 
-    def e2(self, x, y, value):
-        pass
+        for i in range(self.n):
+            for j in range(self.n):
+                # print("-----------")
+                if self.n - i < self.s or self.n - j < self.s:
+                    continue
+                temp = 0
+                for x in range(self.s):
+                    # print(str(j+x) + "," + str(i+x))
+                    # print(self.current_state[j+x][i+x])
+                    if self.current_state[j + x][i + x] == '.':
+                        continue
+                    elif self.current_state[j + x][i + x] == 'B':
+                        score -= 1
+                    elif self.current_state[j + x][i + x] == cell:
+                        temp += 1
+                        score += 2
+                    else:
+                        temp -= 1
+                        score -= 2
+                if temp == 2 and cell == 'X':
+                    score = -1000
+                    return score, None, None
+                elif temp == -2 and cell == 'O':
+                    score = 1000
+                    return score, None, None
+
+        for i in range(self.n - 1, 0, -1):
+            for j in range(self.n):
+                # print("---------")
+                if self.n - i > self.s or self.n - j < self.s:
+                    continue
+                temp = 0
+                for x in range(self.s):
+                    # print(str(i-x) + "," + str(j+x))
+                    # print(self.current_state[i-x][j+x])
+                    if self.current_state[i - x][j + x] == '.':
+                        continue
+                    elif self.current_state[i - x][j + x] == 'B':
+                        score -= 1
+                    elif self.current_state[i - x][j + x] == cell:
+                        temp += 1
+                        score += 2
+                    else:
+                        temp -= 1
+                        score -= 2
+                if temp == 2 and cell == 'X':
+                    score = -1000
+                    return score, None, None
+                elif temp == -2 and cell == 'O':
+                    score = 1000
+                    return score, None, None
+
+        return score, None, None
+
+    def isSafe(self, i, j, visited, cell):
+        return (0 <= i < self.n and
+                0 <= j < self.n and
+                not visited[i][j] and self.current_state[i][j] == cell)
+
+    def DFS(self, i, j, visited, count):
+
+        rowNbr = [-1, -1, -1, 0, 0, 1, 1, 1]
+        colNbr = [-1, 0, 1, -1, 1, -1, 0, 1]
+
+        visited[i][j] = True
+
+        for k in range(8):
+            if self.isSafe(i + rowNbr[k], j + colNbr[k], visited, self.current_state[i][j]):
+                count += 1
+                self.DFS(i + rowNbr[k], j + colNbr[k], visited, count)
+
+        if count == 0:
+            visited[i][j] = False
 
     def play(self, algo=None, player_x=None, player_o=None):
         if algo == None:
@@ -371,14 +504,14 @@ class Game:
             start = time.time()
             if algo == self.MINIMAX:
                 if self.player_turn == 'X':
-                    (_, x, y) = self.minimax(max=False)
+                    (_, x, y) = self.minimax(self.d1, self.t, max=False)
                 else:
-                    (_, x, y) = self.minimax(max=True)
+                    (_, x, y) = self.minimax(self.d2, self.t, max=True)
             else:  # algo == self.ALPHABETA
                 if self.player_turn == 'X':
-                    (m, x, y) = self.alphabeta(max=False)
+                    (m, x, y) = self.alphabeta(self.d1, self.t, max=False)
                 else:
-                    (m, x, y) = self.alphabeta(max=True)
+                    (m, x, y) = self.alphabeta(self.d2, self.t, max=True)
             end = time.time()
             if (self.player_turn == 'X' and player_x == self.HUMAN) or (
                     self.player_turn == 'O' and player_o == self.HUMAN):
@@ -441,9 +574,9 @@ def main():
         flag = False
 
     if args.p2.lower() == "human":
-        p1 = Game.HUMAN
+        p2 = Game.HUMAN
     elif args.p2.lower() == "ai":
-        p1 = Game.AI
+        p2 = Game.AI
     else:
         print("p2 must be human or ai")
         flag = False
@@ -454,11 +587,15 @@ def main():
             flag = False
 
     if flag:
-        g = Game(args.n, args.b, args.coordinate, args.s, args.d1, args.d2, args.t, args.a, args.p1, args.p2,
-                 recommend=False)
+        g = Game(args.n, args.b, args.coordinate, args.s, args.d1, args.d2, args.t, a, p1, p2,
+                 recommend=True)
         # g.draw_board()
         # g.play(algo=Game.ALPHABETA, player_x=Game.AI, player_o=Game.AI)
-        g.play(algo=Game.MINIMAX,player_x=Game.HUMAN,player_o=Game.HUMAN)
+
+        if a:
+            g.play(algo=Game.ALPHABETA, player_x=p1, player_o=p2)
+        else:
+            g.play(algo=Game.MINIMAX, player_x=p1, player_o=p2)
 
 
 if __name__ == "__main__":
