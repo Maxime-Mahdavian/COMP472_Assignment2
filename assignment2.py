@@ -68,7 +68,7 @@ class Game:
                     x = random.randint(0, self.n - 1)
                     y = random.randint(0, self.n - 1)
 
-                self.current_state[x][y] = 'B'
+                # self.current_state[x][y] = 'B'
                 string += "(" + str(x) + "," + str(y) + "), "
 
         string += ']\n\n'
@@ -87,6 +87,29 @@ class Game:
         string += " d=" + str(self.d2) + " a=" + str(self.a) + ' e2\n\n'
 
         self.file.write(string)
+
+        # self.current_state[0][0] = 'X'
+        # self.current_state[0][1] = 'X'
+        # self.current_state[1][0] = 'O'
+        # self.current_state[2][0] = 'O'
+        # self.current_state[3][0] = 'X'
+        # self.current_state[1][0] = 'O'
+        # self.current_state[1][1] = 'X'
+        # self.current_state[2][1] = 'B'
+        # self.current_state[3][1] = 'O'
+        # self.current_state[4][1] = 'B'
+        # self.current_state[0][2] = 'B'
+        # self.current_state[1][2] = 'O'
+        # self.current_state[2][2] = 'O'
+        # self.current_state[3][2] = 'X'
+        # self.current_state[0][3] = 'B'
+        # self.current_state[1][3] = 'X'
+        # self.current_state[2][3] = 'X'
+        # self.current_state[4][3] = 'B'
+        # self.current_state[0][4] = 'X'
+        # self.current_state[1][4] = 'X'
+        # self.current_state[2][4] = 'O'
+        # self.current_state[3][4] = 'B'
 
         # Player X always plays first
         self.player_turn = 'X'
@@ -370,23 +393,24 @@ class Game:
         # 0  - a tie
         # 1  - loss for 'X'
         # We're initially setting it to 2 or -2 as worse than the worst case:
-
+        x = None
+        y = None
         start_time = time.time()
-        if time_left < 0.1:
+        if time_left < 0.05:
             if max:
                 self.recursion_depth.append(self.d2 - depth)
                 self.evaluation_depth.append(self.d2 - depth)
+                # print("No time left")
                 return self.e1('O', self.d2 - depth)
             else:
                 self.recursion_depth.append(self.d1 - depth)
                 self.evaluation_depth.append(self.d1 - depth)
+                # print("No time left")
                 return self.e2('X', self.d1 - depth)
 
         value = math.inf
         if max:
             value = -math.inf
-        x = None
-        y = None
 
         result = self.is_end()
         if result == 'X':
@@ -395,22 +419,26 @@ class Game:
             self.evaluation_depth.append(self.d1 - depth)
             self.eval_by_depth[self.d1 - depth] += 1
             self.total_eval_by_depth[self.d1 - depth] += 1
+            # print("this is the end")
             return -self.n * self.n, x, y
         elif result == 'O':
             self.heuristic_eval += 1
             self.evaluation_depth.append(self.d2 - depth)
             self.recursion_depth.append(self.d2 - depth)
             self.eval_by_depth[self.d2 - depth] += 1
+            # print("this is the end")
             return self.n * self.n + 1, x, y
 
         if depth == 0:
             if max:
                 self.recursion_depth.append(self.d2)
                 self.evaluation_depth.append(self.d2)
+                # print("deep enough bro")
                 return self.e1('O', self.d2)
             else:
                 self.recursion_depth.append(self.d1)
                 self.evaluation_depth.append(self.d1)
+                # print("deep enough bro")
                 return self.e2('X', self.d1)
 
         for i in range(0, self.n):
@@ -421,7 +449,11 @@ class Game:
                         end_time = time.time()
                         new_time_left = time_left - (end_time - start_time)
                         (v, _, _) = self.alphabeta(depth - 1, new_time_left, alpha, beta, max=False)
-                        if v > value or value == math.inf:
+                        self.heuristic_eval += 1
+                        self.evaluation_depth.append(self.d2 - depth)
+                        self.recursion_depth.append(self.d2 - depth)
+                        self.eval_by_depth[self.d2 - depth] += 1
+                        if v > value or value == -math.inf:
                             value = v
                             x = i
                             y = j
@@ -430,22 +462,29 @@ class Game:
                         end_time = time.time()
                         new_time_left = time_left - (end_time - start_time)
                         (v, _, _) = self.alphabeta(depth - 1, new_time_left, alpha, beta, max=True)
-                        if v < value or value == -math.inf:
+                        self.heuristic_eval += 1
+                        self.recursion_depth.append(self.d1 - depth)
+                        self.evaluation_depth.append(self.d1 - depth)
+                        self.eval_by_depth[self.d1 - depth] += 1
+                        self.total_eval_by_depth[self.d1 - depth] += 1
+                        if v < value or value == math.inf:
                             value = v
                             x = i
                             y = j
                     self.current_state[i][j] = '.'
                     if max:
                         if value >= beta:
+                            # print("beta pruning")
                             return (value, x, y)
                         if value > alpha:
                             alpha = value
                     else:
                         if value <= alpha:
+                            # print("alpha pruning")
                             return (value, x, y)
                         if value < beta:
                             beta = value
-
+        # print("i don't know man")
         return (value, x, y)
 
     def e1(self, cell, depth):
@@ -453,17 +492,32 @@ class Game:
         self.heuristic_eval += 1
         self.eval_by_depth[depth] += 1
         self.total_eval_by_depth[depth] += 1
-        visited = [[False for j in range(self.n)] for i in range(self.n)]
+        visited_1 = [[False for j in range(self.n)] for i in range(self.n)]
+        visited_2 = [[False for j in range(self.n)] for i in range(self.n)]
 
+        flag = '.'
         count = 0
+        count_2 = 0
         x = 0
+        y = 0
         for i in range(self.n):
             for j in range(self.n):
-                if visited[i][j] == False and self.current_state[i][j] == cell:
-                    self.DFS(i, j, visited, x)
+                if visited_1[i][j] == False and self.current_state[i][j] == cell:
+                    self.DFS(i, j, visited_1, x)
                     count += 1
 
-        test = numpy.array(visited).sum()
+        if cell == 'X':
+            flag = 'O'
+        else:
+            flag = 'X'
+
+        for i in range(self.n):
+            for j in range(self.n):
+                if visited_2[i][j] == False and self.current_state[i][j] == flag:
+                    self.DFS(i, j, visited_2, x)
+                    count_2 += 1
+
+        test = numpy.array(visited_1).sum() - numpy.array(visited_2).sum()
         return test, None, None
         # return count
 
@@ -629,8 +683,10 @@ class Game:
             if self.check_end():
                 if self.scoreboard:
                     os.remove("temp.txt")
-                return (self.result, numpy.mean(self.total_evaluation_time), sum(self.total_heuristics_eval), self.total_eval_by_depth,
-                        numpy.mean(self.total_evaluation_depth), numpy.mean(self.total_recursion_depth), self.total_moves)
+                return (self.result, numpy.mean(self.total_evaluation_time), sum(self.total_heuristics_eval),
+                        self.total_eval_by_depth,
+                        numpy.mean(self.total_evaluation_depth), numpy.mean(self.total_recursion_depth),
+                        self.total_moves)
             start = time.time()
             if algo == self.MINIMAX:
                 if self.player_turn == 'X':
@@ -751,14 +807,8 @@ def main():
         scoreboard_file.write(
             "n=" + str(args.n) + " b=" + str(args.b) + " s=" + str(args.s) + " t=" + str(args.t) + "\n\n")
         scoreboard_file.write("Player 1: d=" + str(args.d1) + " a=" + str(args.a) + "\n")
-        scoreboard_file.write("Player 2: d=" + str(args.d1) + " a=" + str(args.a) + "\n\n")
+        scoreboard_file.write("Player 2: d=" + str(args.d2) + " a=" + str(args.a) + "\n\n")
         scoreboard_file.write("10 games\n\n")
-        # self.file.write("Average evaluation time: " + str(numpy.mean(self.total_evaluation_time)) + "s\n")
-        # self.file.write("Heuristic evaluations: " + str(sum(self.total_heuristics_eval)) + "\n")
-        # self.file.write("Evaluation by depth: " + self.print_eval_by_depth(self.total_eval_by_depth) + "\n")
-        # self.file.write("Average evaluation depth: " + str(numpy.mean(self.total_evaluation_depth)) + "\n")
-        # self.file.write("Average recursion depth: " + str(numpy.mean(self.total_recursion_depth)) + "\n")
-        # self.file.write("Total moves: " + str(self.total_moves))
 
         results = []
         total_eval_time = []
@@ -803,12 +853,15 @@ def main():
 
         # print(results.count('O'))
         # print(results.count('X'))
-        scoreboard_file.write("Total wins for heuristic e1: " + str(results.count('O')) + " (" + str(results.count('O')/10*100) + "%)\n")
-        scoreboard_file.write("Total wins for heuristic e2: " + str(results.count('X')) + " (" + str(results.count('X')/10*100) + "%)\n\n")
+        scoreboard_file.write("Total wins for heuristic e1: " + str(results.count('O')) + " (" + str(
+            results.count('O') / 10 * 100) + "%)\n")
+        scoreboard_file.write("Total wins for heuristic e2: " + str(results.count('X')) + " (" + str(
+            results.count('X') / 10 * 100) + "%)\n")
+        scoreboard_file.write("Total ties: " + str(results.count('.')) + " (" + str(results.count('.')/10*100) + "%)\n\n")
 
         scoreboard_file.write("Average evaluation time: " + str(numpy.mean(total_eval_time)) + "s\n")
         scoreboard_file.write("Total heuristic evaluation: " + str(sum(total_heuristic_eval)) + "\n")
-        scoreboard_file.write("Evaluations by depth: " + str(Game.print_eval_by_depth(g,total_eval_by_depth)) + "\n")
+        scoreboard_file.write("Evaluations by depth: " + str(Game.print_eval_by_depth(g, total_eval_by_depth)) + "\n")
         scoreboard_file.write("Average evaluation depth: " + str(numpy.mean(total_evaluation_depth)) + "\n")
         scoreboard_file.write("Average recursion depth: " + str(numpy.mean(total_recursion_depth)) + "\n")
         scoreboard_file.write("Average moves per game: " + str(numpy.mean(total_moves)) + "\n")

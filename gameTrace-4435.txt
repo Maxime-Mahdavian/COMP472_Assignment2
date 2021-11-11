@@ -1,0 +1,126 @@
+n=4 b=4 s=3 t=5
+blocs=[(1,3), (2,1), (3,3), (0,3), ]
+
+Player 1: Human d=6 a=False e1
+Player 2: Human d=6 a=False e2
+
+Initial board configuration
+  0 1 2 3 
+0|.|.|.|.|
+1|.|.|.|.|
+2|.|.|.|.|
+3|.|.|.|.|
+
+Move: 1
+Player X under AI control plays: x = 0, y = 1
+
+  0 1 2 3 
+0|.|.|.|.|
+1|X|.|.|.|
+2|.|.|.|.|
+3|.|.|.|.|
+
+Evaluation time: 4.9014668s
+Heuristic evaluations: 100772
+Evaluation by depth: {1: 9, 2: 12, 3: 4, 4: 10, 6: 2043090, }
+Average evaluation depth: 5.999938819210768
+Average Recursion depth: 5.99610656091364
+
+Move: 2
+Player O under AI control plays: x = 0, y = 3
+
+  0 1 2 3 
+0|.|.|.|.|
+1|X|.|.|.|
+2|.|.|.|.|
+3|O|.|.|.|
+
+Evaluation time: 4.9013286s
+Heuristic evaluations: 906004
+Evaluation by depth: {1: 14, 2: 6, 5: 10, 6: 111110, }
+Average evaluation depth: 5.9990642432967425
+Average Recursion depth: 5.996147847785402
+
+Move: 3
+Player X under AI control plays: x = 0, y = 0
+
+  0 1 2 3 
+0|X|.|.|.|
+1|X|.|.|.|
+2|.|.|.|.|
+3|O|.|.|.|
+
+Evaluation time: 3.7039959s
+Heuristic evaluations: 192276
+Evaluation by depth: {6: 1640304, }
+Average evaluation depth: 6.0
+Average Recursion depth: 5.9848279474838755
+
+Move: 4
+Player O under AI control plays: x = 0, y = 2
+
+  0 1 2 3 
+0|X|.|.|.|
+1|X|.|.|.|
+2|O|.|.|.|
+3|O|.|.|.|
+
+Evaluation time: 4.9008334s
+Heuristic evaluations: 1130464
+Evaluation by depth: {1: 11, 2: 2, 4: 6, 6: 109941, }
+Average evaluation depth: 5.999317933794107
+Average Recursion depth: 5.987435617293585
+
+Move: 5
+Player X under AI control plays: x = 1, y = 0
+
+  0 1 2 3 
+0|X|X|.|.|
+1|X|.|.|.|
+2|O|.|.|.|
+3|O|.|.|.|
+
+Evaluation time: 1.0099175s
+Heuristic evaluations: 105244
+Evaluation by depth: {6: 391572, }
+Average evaluation depth: 6.0
+Average Recursion depth: 5.966426202054684
+
+Move: 6
+Player O under AI control plays: x = 1, y = 1
+
+  0 1 2 3 
+0|X|X|.|.|
+1|X|O|.|.|
+2|O|.|.|.|
+3|O|.|.|.|
+
+Evaluation time: 4.8493509s
+Heuristic evaluations: 1414312
+Evaluation by depth: {6: 111708, }
+Average evaluation depth: 6.0
+Average Recursion depth: 5.941861969340894
+
+Move: 7
+Player X under AI control plays: x = 2, y = 0
+
+  0 1 2 3 
+0|X|X|X|.|
+1|X|O|.|.|
+2|O|.|.|.|
+3|O|.|.|.|
+
+Evaluation time: 0.1006575s
+Heuristic evaluations: 29434
+Evaluation by depth: {6: 23472, }
+Average evaluation depth: 6.0
+Average Recursion depth: 5.86555400143651
+
+The winner is X!
+
+Average evaluation time: 3.481078657142857s
+Heuristic evaluations: 3878506
+Evaluation by depth: {1: 34, 2: 20, 3: 4, 4: 16, 5: 10, 6: 4431197, }
+Average evaluation depth: 5.999760142328802
+Average recursion depth: 5.962622878044084
+Total moves: 8

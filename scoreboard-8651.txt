@@ -1,0 +1,17 @@
+n=8 b=6 s=5 t=1
+
+Player 1: d=2 a=true
+Player 2: d=6 a=true
+
+10 games
+
+Total wins for heuristic e1: 0 (0.0%)
+Total wins for heuristic e2: 1 (10.0%)
+Total ties: 9 (90.0%)
+
+Average evaluation time: 0.29683244534455133s
+Total heuristic evaluation: 51477820
+Evaluations by depth: {0: 5445, 1: 3718339, 2: 258073, 4: 15408, 5: 132, 6: 3615862, }
+Average evaluation depth: 3.1708291738435626
+Average recursion depth: 3.1708291738435626
+Average moves per game: 62.5
