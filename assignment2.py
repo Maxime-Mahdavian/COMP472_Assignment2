@@ -1,6 +1,5 @@
 # based on code from https://stackabuse.com/minimax-and-alpha-beta-pruning-in-python
 import os
-import tempfile
 import time
 import argparse
 import numpy
@@ -87,29 +86,6 @@ class Game:
         string += " d=" + str(self.d2) + " a=" + str(self.a) + ' e2\n\n'
 
         self.file.write(string)
-
-        # self.current_state[0][0] = 'X'
-        # self.current_state[0][1] = 'X'
-        # self.current_state[1][0] = 'O'
-        # self.current_state[2][0] = 'O'
-        # self.current_state[3][0] = 'X'
-        # self.current_state[1][0] = 'O'
-        # self.current_state[1][1] = 'X'
-        # self.current_state[2][1] = 'B'
-        # self.current_state[3][1] = 'O'
-        # self.current_state[4][1] = 'B'
-        # self.current_state[0][2] = 'B'
-        # self.current_state[1][2] = 'O'
-        # self.current_state[2][2] = 'O'
-        # self.current_state[3][2] = 'X'
-        # self.current_state[0][3] = 'B'
-        # self.current_state[1][3] = 'X'
-        # self.current_state[2][3] = 'X'
-        # self.current_state[4][3] = 'B'
-        # self.current_state[0][4] = 'X'
-        # self.current_state[1][4] = 'X'
-        # self.current_state[2][4] = 'O'
-        # self.current_state[3][4] = 'B'
 
         # Player X always plays first
         self.player_turn = 'X'
